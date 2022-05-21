@@ -1,4 +1,5 @@
 {
+  "name": "Bible Reading Bookmarks",
   "main": "tests.js",
   "type":"module"
 }
