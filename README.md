@@ -9,3 +9,5 @@ However, there are some features I wanted that I didn't see in an existing gener
 * Modern, compact bookmark formatting
 * Plan more or fewer chapters on weekends
 * Easily regenerate the plan starting at the chapter you're on (if you get behind)
+
+You can try it out here: https://prust.github.io/bible-reading-bookmarks/
