@@ -10,9 +10,13 @@
      but give the main cells 2 or 3px of left/right padding */
   .start {border-left: 1px solid #eee; text-align: right; padding-left: 1px}
   .end {border-right: 1px solid #eee; padding-right: 1px}
+
   @media print {
     .noprint {
       display: none;
+    }
+    @page {
+      size: landscape
     }
   }
 </style>
