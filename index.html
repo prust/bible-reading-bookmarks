@@ -10,54 +10,46 @@
      but give the main cells 2 or 3px of left/right padding */
   .start {border-left: 1px solid #eee; text-align: right; padding-left: 1px}
   .end {border-right: 1px solid #eee; padding-right: 1px}
+  @media print {
+    .noprint {
+      display: none;
+    }
+  }
 </style>
 <script type="module">
   import generate from './reading-plan-generator.js';
-  import {books, NAME, ABBR} from './reading-plan-generator.js';
+  import {books, NAME, ABBR, toISODate, fromISODate} from './reading-plan-generator.js';
 
-  // Jimmy's OT
-  // let start_date = '2022-05-15';
+  // NT-in-a-year
   // let readings = generate({
-  //   start_bk: 2, // 59 - 1 Peter
-  //   start_ch: 11, // 4
-  //   end_bk: 38,
-  //   end_ch: 4,
-  //   start_date: start_date,
-  //   ch_speed: [2, 1, 1, 1, 1, 1, 1]// [0, 3, 3, 3, 3, 3, 0]
-  // });
-
-  // Jimmy's NT
-  let start_date = '2022-05-15';
-  let readings = generate({
-    start_bk: 39, // 59 - 1 Peter
-    start_ch: 12, // 4
-    end_bk: 65,
-    end_ch: 22,
-    start_date: start_date,
-    ch_speed: [2, 1, 1, 1, 1, 1, 1]// [0, 3, 3, 3, 3, 3, 0]
-  });
-
-  // Owen's OT (Th/Sa) - Maybe Saturdays should be Genesis and Th should be elsewhere? Maybe he should read Hurlbut? And/or NLT?
-  // let start_date = '2022-05-19';
-  // let readings = generate({
-  //   start_bk: 0, // Genesis
-  //   start_ch: 23,
-  //   end_bk: 38,
-  //   end_ch: 4,
-  //   start_date: start_date,
-  //   ch_speed: [0, 0, 0, 0, 2, 0, 2]
-  // });
-
-  // Owen's NT (Su)
-  // let start_date = '2022-05-19';
-  // let readings = generate({
-  //   start_bk: 40, // Mark
+  //   start_bk: 39, // Matthew
   //   start_ch: 1,
-  //   end_bk: 38,
-  //   end_ch: 4,
-  //   start_date: start_date,
-  //   ch_speed: [2, 0, 0, 0, 0, 0, 0]
+  //   end_bk: 65, // Revelation
+  //   end_ch: 22,
+  //   start_date: '2025-01-01',
+  //   ch_speed: [0, 1, 1, 1, 1, 1, 0]
   // });
+
+  // OT-in-2-years
+  // let readings = generate({
+  //   start_bk: 1, // Genesis
+  //   start_ch: 1,
+  //   end_bk: 38, // Malachi
+  //   end_ch: 4,
+  //   start_date: '2025-01-01',
+  //   ch_speed: [2, 1, 1, 1, 1, 1, 2]
+  // });
+
+  // Peter's OT
+  let start_date = '2024-12-17';
+  let readings = generate({
+    start_bk: 9, // 2 Samuel
+    start_ch: 13,
+    end_bk: 38, // Malachi
+    end_ch: 4,
+    start_date: start_date,
+    ch_speed: [2, 1, 1, 1, 1, 1, 2]// [0, 3, 3, 3, 3, 3, 0]
+  });
 
   // test
   // let start_date = '2022-05-15';
@@ -75,8 +67,8 @@
     <tbody>
       <tr>`;
 
-  let date = new Date(`${start_date}T00:00:00Z`);
-  let day = date.getUTCDay();
+  let date = fromISODate(start_date);
+  let day = date.getDay();
   
   // generate empty leading cells if the plan doesn't start on a Sunday
   for (let i = 0; i < day; i++)
@@ -94,13 +86,13 @@
     html += `${reading.start_ch}</td>`;
 
     // hyphen
-    html += `<td>-</td>`;
+    html += `<td>${isOneCh(reading) ? '' : '-'}</td>`;
 
     // end
     html += `<td class="end">`;
     if (reading.end_bk != reading.start_bk)
       html += `<span class="bk">${books[reading.end_bk][ABBR]}</span><br>`;
-    html += `${reading.end_ch}</td>`;
+    html += `${isOneCh(reading) ? '' : reading.end_ch}</td>`;
 
     if (day == 6) {
       html += `</tr>
@@ -109,12 +101,12 @@
     
     // TODO: We *always* need to advance the date... we don't always need to advance the reading
     // maybe we should be looping dates & not readings?
-    while (date.toISOString().split('T')[0] != reading.date)
+    while (toISODate(date) != reading.date)
       html += `<td colspan="3" class="empty"></td>`;
 
     prev_reading = reading;
     date.setDate(date.getDate() + 1);
-    day = date.getUTCDay();
+    day = date.getDay();
   }
 
   if (!html.endsWith('</tr>'))
@@ -123,15 +115,19 @@
   html += `</tbody></table>`;
 
   document.getElementById('target').innerHTML = html;
+
+  function isOneCh(reading) {
+    return reading.start_bk == reading.end_bk && reading.start_ch == reading.end_ch;
+  }
 </script>
 </head>
 
 <body>
-  <h1>Bible Reading Bookmarks</h1>
-  <p>There are <a href="http://thebibleteam.com/PlanMaker.asp">many</a> <a href="http://khornberg.github.io/bible-reading-planner/">existing</a> bible reading plan generators -- 
+  <h1 class="noprint">Bible Reading Bookmarks</h1>
+  <p class="noprint">There are <a href="http://thebibleteam.com/PlanMaker.asp">many</a> <a href="http://khornberg.github.io/bible-reading-planner/">existing</a> bible reading plan generators -- 
     the one at <a href="https://www.biblereadingplangenerator.com/">biblereadingplangenerator.com</a> in particular has many powerful features.</p>
-  <p>However, there are some features I wanted that I didn't see in an existing generator:</p>
-  <ul>
+  <p class="noprint">However, there are some features I wanted that I didn't see in an existing generator:</p>
+  <ul class="noprint">
     <li>Modern, compact bookmark formatting</li>
     <li>Plan more or fewer chapters on weekends</li>
     <li>Easily regenerate the plan starting at the chapter you're on (if you get behind)</li>
